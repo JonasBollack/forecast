@@ -1,7 +1,10 @@
 search.arima <- function(x, d=NA, D=NA, max.p=5, max.q=5,
                          max.P=2, max.Q=2, max.order=5, stationary=FALSE, ic=c("aic", "aicc", "bic"),
                          trace=FALSE, approximation=FALSE, xreg=NULL, offset=offset, allowdrift=TRUE,
-                         allowmean=TRUE, parallel=FALSE, num.cores=2, ...) {
+                         allowmean=TRUE, parallel=FALSE, num.cores=2, 
+                         series = deparse(substitute(x)), orig.x = NULL, 
+                         call = NULL, call.x = NULL,
+                         lambda = NULL, ...) {
   # dataname <- substitute(x)
   ic <- match.arg(ic)
   m <- frequency(x)
@@ -14,6 +17,9 @@ search.arima <- function(x, d=NA, D=NA, max.p=5, max.q=5,
   # Choose model orders
   # Serial - technically could be combined with the code below
   if (parallel == FALSE) {
+    # Jonas
+    results <- list()
+
     best.ic <- Inf
     for (i in 0:max.p) {
       for (j in 0:max.q) {
@@ -26,6 +32,14 @@ search.arima <- function(x, d=NA, D=NA, max.p=5, max.q=5,
                   constant = (K == 1), trace = trace, ic = ic, approximation = approximation,
                   offset = offset, xreg = xreg, ...
                 )
+                # Jonas
+                fit$call <- call
+                fit$call$x <- call.x
+                fit$lambda <- lambda
+                fit$x <- orig.x
+                fit$series <- series
+                fit$fitted <- fitted(fit)
+                results <- c(results, list(fit))
                 if (fit$ic < best.ic) {
                   best.ic <- fit$ic
                   bestfit <- fit
@@ -120,6 +134,8 @@ search.arima <- function(x, d=NA, D=NA, max.p=5, max.q=5,
   bestfit$series <- deparse(substitute(x))
   bestfit$ic <- NULL
   bestfit$call <- match.call()
+
+  bestfit$results <- results
 
   if (trace) {
     cat("\n\n")

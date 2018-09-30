@@ -340,7 +340,10 @@ auto.arima <- function(y, d=NA, D=NA, max.p=5, max.q=5,
       x, d, D, max.p, max.q, max.P, max.Q, max.order, stationary,
       ic, trace, approximation, xreg = xreg, offset = offset,
       allowdrift = allowdrift, allowmean = allowmean,
-      parallel = parallel, num.cores = num.cores, ...
+      parallel = parallel, num.cores = num.cores, 
+      series = series, orig.x = orig.x, 
+      call = match.call(), call.x = data.frame(x = x),
+      lambda = lambda, ...
     )
     bestfit$call <- match.call()
     bestfit$call$x <- data.frame(x = x)
@@ -584,6 +587,8 @@ auto.arima <- function(y, d=NA, D=NA, max.p=5, max.q=5,
   if (trace) {
     cat("\n\n Best model:", arima.string(bestfit, padding = TRUE), "\n\n")
   }
+
+  bestfit$result <- results
 
   return(bestfit)
 }
